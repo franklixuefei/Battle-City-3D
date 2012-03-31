@@ -1,0 +1,4 @@
+*.o
+*.d
+*~
+battle_city

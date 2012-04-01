@@ -15,7 +15,6 @@ class Viewer : public Gtk::GL::DrawingArea
     {
       POSITION_ORIENTATION, JOINTS
     };
-
     Viewer();
     virtual ~Viewer();
 
@@ -28,8 +27,11 @@ class Viewer : public Gtk::GL::DrawingArea
     void reset_orientation();
     void reset_joints();
     void reset_all();
+    void undo();
+    void redo();
     void set_mode(mode_t mode);
     void toggle_z_buffer();
+    void toggle_backface_cull();
   protected:
 
     // Events we implement
@@ -53,12 +55,10 @@ class Viewer : public Gtk::GL::DrawingArea
 
     // Draw a circle for the trackball, with OpenGL commands.
     // Assumes the context for the viewer is active.
-    void draw_trackball_circle();
     void draw_model(bool is_picking = false);
-    void draw_board();
 
   private:
-//    SceneNode* model;
+    SceneNode* model;
     std::list<SceneNode*> selected_joint_nodes;
     mode_t m_mode;
     gdouble m_last_x;
@@ -66,13 +66,10 @@ class Viewer : public Gtk::GL::DrawingArea
     bool m_left;
     bool m_right;
     bool m_middle;
-    bool m_circle;
     bool m_z_buffer;
     bool m_backface_cull;
-    bool m_frontface_cull;
     Matrix4x4 m_translation;
     Matrix4x4 m_rotation;
-    GLuint m_texture[5];
     GLuint select_buffer[100];
     void initialize_parameters();
     void perform_transformation(float fOldX, float fNewX, float fOldY,
@@ -81,9 +78,10 @@ class Viewer : public Gtk::GL::DrawingArea
         float fDiameter, float *fVecX, float *fVecY, float *fVecZ);
     void vAxisRotMatrix(float fVecX, float fVecY, float fVecZ,
         Matrix4x4* mNewMat);
+    void picking(int cursorX, int cursorY);
+    void process_hits(GLint hits, GLuint buffer[]);
     void perform_joint_rotation(float fOldX, float fNewX, float fOldY,
         float fNewY);
-    void draw_texture_cube();
 };
 
 #endif

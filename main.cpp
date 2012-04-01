@@ -12,6 +12,17 @@ int main(int argc, char** argv)
 
   // Initialize OpenGL
   Gtk::GL::init(argc, argv);
+
+  filename = "puppet.lua";
+  if (argc >= 2) {
+    filename = argv[1];
+  }
+  // This is how you might import a scene.
+//  SceneNode* root = import_lua(filename);
+//  if (!root) {
+//    std::cerr << "Could not open " << filename << std::endl;
+//    return 1;
+//  }
   
   // Construct our (only) window
   AppWindow window;

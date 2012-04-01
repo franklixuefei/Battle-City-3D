@@ -115,7 +115,7 @@ void JointNode::rotate_by(float angle, bool x_axis)
 }
 
 GeometryNode::GeometryNode(const std::string& name, Primitive* primitive) :
-    SceneNode(name), m_primitive(primitive)
+    SceneNode(name), m_material(NULL), m_primitive(primitive)
 {
 }
 

@@ -4,7 +4,6 @@
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
 std::string filename;
 Viewer::Viewer()
 {
@@ -33,11 +32,13 @@ Viewer::Viewer()
 
   initialize_parameters();
 
-//  model = import_lua(filename);
-//  if (!model) {
-//    std::cerr << "Could not open " << filename << std::endl;
-//  }
-//  model->set_parentNode(model);
+//  model = import_lua("puppet.lua");
+
+  model = import_lua(filename);
+  if (!model) {
+    std::cerr << "Could not open " << filename << std::endl;
+  }
+  model->set_parentNode(model);
 }
 
 void Viewer::initialize_parameters()
@@ -48,10 +49,8 @@ void Viewer::initialize_parameters()
   m_left = false;
   m_right = false;
   m_middle = false;
-  m_circle = false;
   m_z_buffer = false;
   m_backface_cull = false;
-  m_frontface_cull = false;
   m_translation = Matrix4x4();
   m_rotation = Matrix4x4();
 }
@@ -98,16 +97,10 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
 
   if (!gldrawable->gl_begin(get_gl_context()))
     return false;
-  glClearColor(0.7, 0.7, 0.7, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  double width = get_width();
-  double height = get_height();
-
-  // Set up for perspective drawing
+  // Set up for perspective drawing 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluOrtho2D(0.0, (double) width, 0.0, (double) height);
   glViewport(0, 0, get_width(), get_height());
   gluPerspective(40.0, (GLfloat) get_width() / (GLfloat) get_height(), 0.1,
       1000.0);
@@ -115,25 +108,24 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   // change to model view for drawing
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glTranslated(0.0, (double) height, 0.0);
-  glScaled(1.0, -1.0, 1.0);
-
-  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glLineWidth(1.0);
 
   // Clear framebuffer
-//  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//  if (m_z_buffer) {
-//    glEnable(GL_DEPTH_TEST);
-//    glDepthMask(GL_TRUE);
-//  }
+  if (m_z_buffer) {
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+  }
 
-//    glCullFace(GL_BACK);
-//    glEnable(GL_CULL_FACE);
+  if (m_backface_cull) {
+    glCullFace(GL_BACK);
+  }
+
+  if (m_backface_cull) {
+    glEnable(GL_CULL_FACE);
+  } else {
+    glDisable(GL_CULL_FACE);
+  }
 
   // Set up lighting
   glEnable(GL_LIGHTING);
@@ -148,15 +140,7 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
   // Draw stuff
-  glColor3f(1.0, 0.0, 0.0);
-  glBegin(GL_LINES);
-  glVertex2d(1.0, 0.0);
-  glVertex2d(0.0, 1.0);
-  glEnd();
-//  draw_board();
-//  draw_model();
-//
-//  draw_trackball_circle();
+  draw_model();
 
   // Swap the contents of the front and back buffers so we see what we
   // just drew. This should only be done if double buffering is enabled.
@@ -189,8 +173,6 @@ bool Viewer::on_configure_event(GdkEventConfigure* event)
   // Reset to modelview matrix mode
 
   glMatrixMode(GL_MODELVIEW);
-//  Image grass_image;
-//  grass_image.loadPng("textures/brick.png");
 
   gldrawable->gl_end();
 
@@ -204,6 +186,9 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
   m_right = (event->button == (guint) 3);
   m_last_x = event->x;
   m_last_y = event->y;
+  if (m_mode == JOINTS && m_left) {
+    picking(event->x, event->y);
+  }
   return true;
 }
 
@@ -233,72 +218,13 @@ bool Viewer::on_motion_notify_event(GdkEventMotion* event)
   return true;
 }
 
-void Viewer::draw_trackball_circle()
-{
-  if (m_circle) {
-    int current_width = get_width();
-    int current_height = get_height();
-
-    // Set up for orthogonal drawing to draw a circle on screen.
-    // You'll want to make the rest of the function conditional on
-    // whether or not we want to draw the circle this time around.
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glViewport(0, 0, current_width, current_height);
-    glOrtho(0.0, (float) current_width, 0.0, (float) current_height, -0.1, 0.1);
-
-    // change to model view for drawing
-    glMatrixMode(GL_MODELVIEW);
-
-    // Reset modelview matrix
-    glLoadIdentity();
-
-    // draw a circle for use with the trackball
-    glDisable(GL_LIGHTING);
-    glEnable(GL_LINE_SMOOTH);
-    glColor3f(1.0, 1.0, 1.0);
-    double radius =
-        current_width < current_height ?
-            (float) current_width * 0.25 : (float) current_height * 0.25;
-    glTranslated((float) current_width * 0.5, (float) current_height * 0.5, 0);
-    glBegin(GL_LINE_LOOP);
-    for (size_t i = 0; i < 40; ++i) {
-      double cosine = radius * cos(i * 2 * M_PI / 40);
-      double sine = radius * sin(i * 2 * M_PI / 40);
-      glVertex2f(cosine, sine);
-    }
-    glEnd();
-    glColor3f(0.0, 0.0, 0.0);
-    glDisable(GL_LINE_SMOOTH);
-  }
-}
-
-void Viewer::draw_board()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glEnable(GL_TEXTURE_2D);
-//      glBindTexture(GL_TEXTURE_2D, texture[0]);
-//      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMode);
-//      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMode);
-
-  glColor4f(0.8, 0.7, 0.11, 1.0);
-  glPushMatrix();
-  glScalef(4, 1.2, 1.5);
-  glTranslatef(0, 0.025, 0);
-  draw_texture_cube();
-//          glutSolidCube(1);
-  glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
-}
-
 void Viewer::draw_model(bool is_picking)
 {
   Matrix4x4 m_world_matrix = m_rotation * m_translation;
   Matrix4x4 m_world_matrix_invert = m_world_matrix.invert();
-
-//  model->set_transform(model->get_transform() * m_world_matrix);
-//  model->walk_gl(is_picking);
-//  model->set_transform(model->get_transform() * m_world_matrix_invert);
+  model->set_transform(model->get_transform() * m_world_matrix);
+  model->walk_gl(is_picking);
+  model->set_transform(model->get_transform() * m_world_matrix_invert);
 }
 
 void Viewer::reset_position()
@@ -315,7 +241,7 @@ void Viewer::reset_orientation()
 
 void Viewer::reset_joints()
 {
-//  model->reset();
+  model->reset();
   invalidate();
 }
 
@@ -323,7 +249,7 @@ void Viewer::reset_all()
 {
   m_translation = Matrix4x4();
   m_rotation = Matrix4x4();
-//  model->reset();
+  model->reset();
   invalidate();
 }
 
@@ -335,6 +261,12 @@ void Viewer::set_mode(mode_t mode)
 void Viewer::toggle_z_buffer()
 {
   m_z_buffer = !m_z_buffer;
+  invalidate();
+}
+
+void Viewer::toggle_backface_cull()
+{
+  m_backface_cull = !m_backface_cull;
   invalidate();
 }
 
@@ -477,63 +409,52 @@ void Viewer::vAxisRotMatrix(float fVecX, float fVecY, float fVecZ,
   *mNewMat = Matrix4x4(rotation);
 }
 
-void Viewer::draw_texture_cube()
+void Viewer::picking(int cursorX, int cursorY)
 {
-  glColor3f(1.0, 0.0, 0.0);
-  glBegin(GL_QUADS);
-  // Front Face
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, 1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, 1.0f);
-  // Back Face
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, -1.0f);
-  // Top Face
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(-1.0f, 1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(1.0f, 1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, -1.0f);
-  // Bottom Face
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(-1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, 1.0f);
-  // Right face
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, 1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, 1.0f);
-  // Left Face
-//  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, 1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, 1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, -1.0f);
-  glEnd();
+  GLint *viewport = new GLint[4];
+
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+  glSelectBuffer(100, select_buffer);
+  glRenderMode(GL_SELECT);
+
+  glInitNames();
+  glPushName(0);
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+
+  gluPickMatrix(cursorX, viewport[3] - cursorY, 1.0, 1.0, viewport);
+  gluPerspective(40.0, (GLfloat) get_width() / (GLfloat) get_height(), 0.1,
+      1000.0);
+  draw_model(true);
+  glPopMatrix();
+  glFlush();
+  int hits;
+  hits = glRenderMode(GL_RENDER);
+  if (hits != 0) {
+    process_hits(hits, select_buffer);
+  }
+}
+
+void Viewer::process_hits(GLint hits, GLuint buffer[])
+{
+  GLuint * ptr;
+  ptr = (GLuint *) buffer;
+  ptr--;
+  for (GLint i = 0; i < hits; i++) {
+    ptr = ptr + 5;
+    SceneNode * node = model->get_node_by_id(*ptr);
+    if (node != 0) {
+      if (node->get_parentNode() != 0) {
+        if (node->toggle_selected()) {
+          selected_joint_nodes.push_back(node->get_parentNode());
+        } else {
+          selected_joint_nodes.remove(node->get_parentNode());
+        }
+      }
+    }
+  }
+  invalidate();
 }

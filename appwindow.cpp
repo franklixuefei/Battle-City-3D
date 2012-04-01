@@ -14,17 +14,12 @@ AppWindow::AppWindow()
   // Set up the application menu
   // The slot we use here just causes AppWindow::hide() on this,
   // which shuts down the application.
+
   m_menu_app.items().push_back(
-      MenuElem("Reset Pos_ition", Gtk::AccelKey("i"),
+      MenuElem("_New Game", Gtk::AccelKey("n"),
           sigc::mem_fun(m_viewer, &Viewer::reset_position)));
   m_menu_app.items().push_back(
-      MenuElem("Reset _Orientation", Gtk::AccelKey("o"),
-          sigc::mem_fun(m_viewer, &Viewer::reset_orientation)));
-  m_menu_app.items().push_back(
-      MenuElem("Reset Joi_nts", Gtk::AccelKey("n"),
-          sigc::mem_fun(m_viewer, &Viewer::reset_joints)));
-  m_menu_app.items().push_back(
-      MenuElem("Reset _All", Gtk::AccelKey("a"),
+      MenuElem("_Reset Game", Gtk::AccelKey("r"),
           sigc::mem_fun(m_viewer, &Viewer::reset_all)));
   m_menu_mode.items().push_back(SeparatorElem());
   m_menu_app.items().push_back(
@@ -35,26 +30,30 @@ AppWindow::AppWindow()
       &Viewer::set_mode);
   Gtk::RadioButtonGroup m_radiobuttongroup_mode;
   m_menu_mode.items().push_back(
-      RadioMenuElem(m_radiobuttongroup_mode, "_Position/Orientation",
-          Gtk::AccelKey("p"),
+      RadioMenuElem(m_radiobuttongroup_mode, "_Strategy Mode",
+          Gtk::AccelKey("1"),
           sigc::bind(mode_slot, Viewer::POSITION_ORIENTATION)));
   m_menu_mode.items().push_back(
-      RadioMenuElem(m_radiobuttongroup_mode, "_Joints", Gtk::AccelKey("j"),
+      RadioMenuElem(m_radiobuttongroup_mode, "_Following Mode",
+          Gtk::AccelKey("2"), sigc::bind(mode_slot, Viewer::JOINTS)));
+  m_menu_mode.items().push_back(
+      RadioMenuElem(m_radiobuttongroup_mode, "_Ground Mode", Gtk::AccelKey("3"),
           sigc::bind(mode_slot, Viewer::JOINTS)));
 
-  m_menu_options.items().push_back(
+  m_menu_levels.items().push_back(
       CheckMenuElem("_Z-buffer", Gtk::AccelKey("z"),
           sigc::mem_fun(m_viewer, &Viewer::toggle_z_buffer)));
+  m_menu_levels.items().push_back(
+      CheckMenuElem("_Backface cull", Gtk::AccelKey("b"),
+          sigc::mem_fun(m_viewer, &Viewer::toggle_backface_cull)));
 
   // Set up the menu bar
   m_menubar.items().push_back(
       Gtk::Menu_Helpers::MenuElem("_Application", m_menu_app));
   m_menubar.items().push_back(
-      Gtk::Menu_Helpers::MenuElem("_Edit", m_menu_edit));
-  m_menubar.items().push_back(
       Gtk::Menu_Helpers::MenuElem("_Mode", m_menu_mode));
   m_menubar.items().push_back(
-      Gtk::Menu_Helpers::MenuElem("_Options", m_menu_options));
+      Gtk::Menu_Helpers::MenuElem("_Levels", m_menu_levels));
 
   // Pack in our widgets
 

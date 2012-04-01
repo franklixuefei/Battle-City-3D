@@ -40,7 +40,11 @@
 #include <cctype>
 #include <cstring>
 #include <cstdio>
+#include <vector>
 #include "lua488.hpp"
+#include "light.hpp"
+//#include "a4.hpp"
+#include "mesh.hpp"
 
 // Uncomment the following line to enable debugging messages
 // #define GRLUA_ENABLE_DEBUG
@@ -80,6 +84,26 @@ struct gr_material_ud
     Material* material;
 };
 
+// The "userdata" type for a light. Objects of this type will be
+// allocated by Lua to represent lights.
+struct gr_light_ud
+{
+    Light* light;
+};
+
+// Useful function to retrieve and check an n-tuple of numbers.
+template<typename T>
+void get_tuple(lua_State* L, int arg, T* data, int n)
+{
+  luaL_checktype(L, arg, LUA_TTABLE);
+  luaL_argcheck(L, luaL_getn(L, arg) == n, arg, "N-tuple expected");
+  for (int i = 1; i <= n; i++) {
+    lua_rawgeti(L, arg, i);
+    data[i - 1] = luaL_checknumber(L, -1);
+    lua_pop(L, 1);
+  }
+}
+
 // Create a node
 extern "C" int gr_node_cmd(lua_State* L)
 {
@@ -108,19 +132,9 @@ extern "C" int gr_joint_cmd(lua_State* L)
   const char* name = luaL_checkstring(L, 1);
   JointNode* node = new JointNode(name);
 
-  luaL_checktype(L, 2, LUA_TTABLE);
-  luaL_argcheck(L, luaL_getn(L, 2) == 3, 2, "Three-tuple expected");
-  luaL_checktype(L, 3, LUA_TTABLE);
-  luaL_argcheck(L, luaL_getn(L, 3) == 3, 3, "Three-tuple expected");
-
   double x[3], y[3];
-  for (int i = 1; i <= 3; i++) {
-    lua_rawgeti(L, 2, i);
-    x[i - 1] = luaL_checknumber(L, -1);
-    lua_rawgeti(L, 3, i);
-    y[i - 1] = luaL_checknumber(L, -1);
-    lua_pop(L, 2);
-  }
+  get_tuple(L, 2, x, 3);
+  get_tuple(L, 3, y, 3);
 
   node->set_joint_x(x[0], x[1], x[2]);
   node->set_joint_y(y[0], y[1], y[2]);
@@ -150,6 +164,199 @@ extern "C" int gr_sphere_cmd(lua_State* L)
   return 1;
 }
 
+// Create a cube node
+extern "C" int gr_cube_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_node_ud* data = (gr_node_ud*) lua_newuserdata(L, sizeof(gr_node_ud));
+  data->node = 0;
+
+  const char* name = luaL_checkstring(L, 1);
+  data->node = new GeometryNode(name, new Cube());
+
+  luaL_getmetatable(L, "gr.node");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Create a non-hierarchical sphere node
+extern "C" int gr_nh_sphere_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_node_ud* data = (gr_node_ud*) lua_newuserdata(L, sizeof(gr_node_ud));
+  data->node = 0;
+
+  const char* name = luaL_checkstring(L, 1);
+
+  Point3D pos;
+  get_tuple(L, 2, &pos[0], 3);
+
+  double radius = luaL_checknumber(L, 3);
+
+  data->node = new GeometryNode(name, new NonhierSphere(pos, radius));
+
+  luaL_getmetatable(L, "gr.node");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Create a non-hierarchical box node
+extern "C" int gr_nh_box_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_node_ud* data = (gr_node_ud*) lua_newuserdata(L, sizeof(gr_node_ud));
+  data->node = 0;
+
+  const char* name = luaL_checkstring(L, 1);
+
+  Point3D pos;
+  get_tuple(L, 2, &pos[0], 3);
+
+  double size = luaL_checknumber(L, 3);
+
+  data->node = new GeometryNode(name, new NonhierBox(pos, size));
+
+  luaL_getmetatable(L, "gr.node");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Create a polygonal mesh node
+extern "C" int gr_mesh_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_node_ud* data = (gr_node_ud*) lua_newuserdata(L, sizeof(gr_node_ud));
+  data->node = 0;
+
+  const char* name = luaL_checkstring(L, 1);
+
+  std::vector<Point3D> verts;
+  std::vector<std::vector<int> > faces;
+
+  luaL_checktype(L, 2, LUA_TTABLE);
+  int vert_count = luaL_getn(L, 2);
+
+  luaL_argcheck(L, vert_count >= 1, 2, "Tuple of vertices expected");
+
+  for (int i = 1; i <= vert_count; i++) {
+    lua_rawgeti(L, 2, i);
+
+    Point3D vertex;
+    get_tuple(L, -1, &vertex[0], 3);
+
+    verts.push_back(vertex);
+    lua_pop(L, 1);
+  }
+
+  luaL_checktype(L, 3, LUA_TTABLE);
+  int face_count = luaL_getn(L, 3);
+
+  luaL_argcheck(L, face_count >= 1, 3, "Tuple of faces expected");
+
+  faces.resize(face_count);
+
+  for (int i = 1; i <= face_count; i++) {
+    lua_rawgeti(L, 3, i);
+
+    luaL_checktype(L, -1, LUA_TTABLE);
+    int index_count = luaL_getn(L, -1);
+
+    luaL_argcheck(L, index_count >= 3, 3, "Tuple of indices expected");
+
+    faces[i - 1].resize(index_count);
+    get_tuple(L, -1, &faces[i - 1][0], index_count);
+
+    lua_pop(L, 1);
+  }
+
+  Mesh* mesh = new Mesh(verts, faces);
+  GRLUA_DEBUG(*mesh);
+  data->node = new GeometryNode(name, mesh);
+
+  luaL_getmetatable(L, "gr.node");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Make a point light
+extern "C" int gr_light_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_light_ud* data = (gr_light_ud*) lua_newuserdata(L, sizeof(gr_light_ud));
+  data->light = 0;
+
+  Light l;
+
+  double col[3];
+  get_tuple(L, 1, &l.position[0], 3);
+  get_tuple(L, 2, col, 3);
+  get_tuple(L, 3, l.falloff, 3);
+
+  l.colour = Colour(col[0], col[1], col[2]);
+
+  data->light = new Light(l);
+
+  luaL_newmetatable(L, "gr.light");
+  lua_setmetatable(L, -2);
+
+  return 1;
+}
+
+// Render a scene
+extern "C" int gr_render_cmd(lua_State* L)
+{
+  GRLUA_DEBUG_CALL;
+
+  gr_node_ud* root = (gr_node_ud*) luaL_checkudata(L, 1, "gr.node");
+  luaL_argcheck(L, root != 0, 1, "Root node expected");
+
+  const char* filename = luaL_checkstring(L, 2);
+
+  int width = luaL_checknumber(L, 3);
+  int height = luaL_checknumber(L, 4);
+
+  Point3D eye;
+  Vector3D view, up;
+
+  get_tuple(L, 5, &eye[0], 3);
+  get_tuple(L, 6, &view[0], 3);
+  get_tuple(L, 7, &up[0], 3);
+
+  double fov = luaL_checknumber(L, 8);
+
+  double ambient_data[3];
+  get_tuple(L, 9, ambient_data, 3);
+  Colour ambient(ambient_data[0], ambient_data[1], ambient_data[2]);
+
+  luaL_checktype(L, 10, LUA_TTABLE);
+  int light_count = luaL_getn(L, 10);
+
+  luaL_argcheck(L, light_count >= 1, 10, "Tuple of lights expected");
+  std::list<Light*> lights;
+  for (int i = 1; i <= light_count; i++) {
+    lua_rawgeti(L, 10, i);
+    gr_light_ud* ldata = (gr_light_ud*) luaL_checkudata(L, -1, "gr.light");
+    luaL_argcheck(L, ldata != 0, 10, "Light expected");
+
+    lights.push_back(ldata->light);
+    lua_pop(L, 1);
+  }
+
+//  a4_render(root->node, filename, width, height, eye, view, up, fov, ambient,
+//      lights);
+
+  return 0;
+}
+
 // Create a material
 extern "C" int gr_material_cmd(lua_State* L)
 {
@@ -159,20 +366,10 @@ extern "C" int gr_material_cmd(lua_State* L)
       sizeof(gr_material_ud));
   data->material = 0;
 
-  luaL_checktype(L, 1, LUA_TTABLE);
-  luaL_argcheck(L, luaL_getn(L, 1) == 3, 1, "Three-tuple expected");
-  luaL_checktype(L, 2, LUA_TTABLE);
-  luaL_argcheck(L, luaL_getn(L, 2) == 3, 2, "Three-tuple expected");
-  luaL_checktype(L, 3, LUA_TNUMBER);
-
   double kd[3], ks[3];
-  for (int i = 1; i <= 3; i++) {
-    lua_rawgeti(L, 1, i);
-    kd[i - 1] = luaL_checknumber(L, -1);
-    lua_rawgeti(L, 2, i);
-    ks[i - 1] = luaL_checknumber(L, -1);
-    lua_pop(L, 2);
-  }
+  get_tuple(L, 1, kd, 3);
+  get_tuple(L, 2, ks, 3);
+
   double shininess = luaL_checknumber(L, 3);
 
   data->material = new PhongMaterial(Colour(kd[0], kd[1], kd[2]),
@@ -317,9 +514,12 @@ extern "C" int gr_node_gc_cmd(lua_State* L)
 // This is where all the "global" functions in our library are
 // declared.
 // If you want to add a new non-member function, add it here.
-static const luaL_reg grlib_functions[] = { { "node", gr_node_cmd }, { "joint",
-    gr_joint_cmd }, { "sphere", gr_sphere_cmd },
-    { "material", gr_material_cmd }, { 0, 0 } };
+static const luaL_reg grlib_functions[] = { { "node", gr_node_cmd }, { "sphere",
+    gr_sphere_cmd }, { "joint", gr_joint_cmd }, { "material", gr_material_cmd },
+// New for assignment 4
+    { "cube", gr_cube_cmd }, { "nh_sphere", gr_nh_sphere_cmd }, { "nh_box",
+        gr_nh_box_cmd }, { "mesh", gr_mesh_cmd }, { "light", gr_light_cmd }, {
+        "render", gr_render_cmd }, { 0, 0 } };
 
 // This is where all the member functions for "gr.node" objects are
 // declared. Since all the other objects (e.g. materials) are so
@@ -336,7 +536,51 @@ static const luaL_reg grlib_functions[] = { { "node", gr_node_cmd }, { "joint",
 static const luaL_reg grlib_node_methods[] = { { "__gc", gr_node_gc_cmd }, {
     "add_child", gr_node_add_child_cmd }, { "set_material",
     gr_node_set_material_cmd }, { "scale", gr_node_scale_cmd }, { "rotate",
-    gr_node_rotate_cmd }, { "translate", gr_node_translate_cmd }, { 0, 0 } };
+    gr_node_rotate_cmd }, { "translate", gr_node_translate_cmd }, { "render",
+    gr_render_cmd }, { 0, 0 } };
+
+// This function calls the lua interpreter to define the scene and
+// raytrace it as appropriate.
+bool run_lua(const std::string& filename)
+{
+  GRLUA_DEBUG("Importing scene from " << filename);
+
+  // Start a lua interpreter
+  lua_State* L = lua_open();
+
+  GRLUA_DEBUG("Loading base libraries");
+
+  // Load some base library
+  luaL_openlibs(L);
+
+  GRLUA_DEBUG("Setting up our functions");
+
+  // Set up the metatable for gr.node
+  luaL_newmetatable(L, "gr.node");
+  lua_pushstring(L, "__index");
+  lua_pushvalue(L, -2);
+  lua_settable(L, -3);
+
+  // Load the gr.node methods
+  luaL_openlib(L, 0, grlib_node_methods, 0);
+
+  // Load the gr functions
+  luaL_openlib(L, "gr", grlib_functions, 0);
+
+  GRLUA_DEBUG("Parsing the scene");
+  // Now parse the actual scene
+  if (luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0)) {
+    std::cerr << "Error loading " << filename << ": "
+        << lua_tostring(L, -1) << std::endl;
+    return false;
+  }
+  GRLUA_DEBUG("Closing the interpreter");
+
+  // Close the interpreter, free up any resources not needed
+  lua_close(L);
+
+  return true;
+}
 
 // This function calls the lua interpreter to do the actual importing
 SceneNode* import_lua(const std::string& filename)

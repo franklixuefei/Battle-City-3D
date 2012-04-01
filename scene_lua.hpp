@@ -4,6 +4,6 @@
 #include <string>
 #include "scene.hpp"
 
+bool run_lua(const std::string& filename);
 SceneNode* import_lua(const std::string& filename);
-
 #endif

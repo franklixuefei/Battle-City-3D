@@ -2,7 +2,7 @@
 
 AppWindow::AppWindow()
 {
-  set_title("Advanced Ergonomics Laboratory");
+  set_title("Battle City 3D");
 
   // A utility class for constructing things that go into menus, which
   // we'll set up next.
@@ -42,25 +42,9 @@ AppWindow::AppWindow()
       RadioMenuElem(m_radiobuttongroup_mode, "_Joints", Gtk::AccelKey("j"),
           sigc::bind(mode_slot, Viewer::JOINTS)));
 
-  m_menu_edit.items().push_back(
-      MenuElem("_Undo", Gtk::AccelKey("u"),
-          sigc::mem_fun(m_viewer, &Viewer::undo)));
-  m_menu_edit.items().push_back(
-      MenuElem("_Redo", Gtk::AccelKey("r"),
-          sigc::mem_fun(m_viewer, &Viewer::redo)));
-
-  m_menu_options.items().push_back(
-      CheckMenuElem("_Circle", Gtk::AccelKey("c"),
-          sigc::mem_fun(m_viewer, &Viewer::toggle_circle)));
   m_menu_options.items().push_back(
       CheckMenuElem("_Z-buffer", Gtk::AccelKey("z"),
           sigc::mem_fun(m_viewer, &Viewer::toggle_z_buffer)));
-  m_menu_options.items().push_back(
-      CheckMenuElem("_Backface cull", Gtk::AccelKey("b"),
-          sigc::mem_fun(m_viewer, &Viewer::toggle_backface_cull)));
-  m_menu_options.items().push_back(
-      CheckMenuElem("_Frontface cull", Gtk::AccelKey("f"),
-          sigc::mem_fun(m_viewer, &Viewer::toggle_frontface_cull)));
 
   // Set up the menu bar
   m_menubar.items().push_back(
@@ -82,7 +66,7 @@ AppWindow::AppWindow()
 
   // Put the viewer below the menubar. pack_start "grows" the widget
   // by default, so it'll take up the rest of the window.
-  m_viewer.set_size_request(300, 300);
+  m_viewer.set_size_request(500, 500);
   m_vbox.pack_start(m_viewer);
 
   show_all();

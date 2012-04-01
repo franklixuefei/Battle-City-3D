@@ -15,6 +15,7 @@ class Viewer : public Gtk::GL::DrawingArea
     {
       POSITION_ORIENTATION, JOINTS
     };
+
     Viewer();
     virtual ~Viewer();
 
@@ -27,13 +28,8 @@ class Viewer : public Gtk::GL::DrawingArea
     void reset_orientation();
     void reset_joints();
     void reset_all();
-    void undo();
-    void redo();
     void set_mode(mode_t mode);
-    void toggle_circle();
     void toggle_z_buffer();
-    void toggle_backface_cull();
-    void toggle_frontface_cull();
   protected:
 
     // Events we implement
@@ -59,18 +55,10 @@ class Viewer : public Gtk::GL::DrawingArea
     // Assumes the context for the viewer is active.
     void draw_trackball_circle();
     void draw_model(bool is_picking = false);
+    void draw_board();
 
   private:
-    struct TransformAction
-    {
-        SceneNode* node;
-        Matrix4x4* transformation;
-    };
-
-    std::stack<std::list<TransformAction> > m_undo_stack;
-    std::stack<std::list<TransformAction> > m_redo_stack;
-
-    SceneNode* model;
+//    SceneNode* model;
     std::list<SceneNode*> selected_joint_nodes;
     mode_t m_mode;
     gdouble m_last_x;
@@ -84,6 +72,7 @@ class Viewer : public Gtk::GL::DrawingArea
     bool m_frontface_cull;
     Matrix4x4 m_translation;
     Matrix4x4 m_rotation;
+    GLuint m_texture[5];
     GLuint select_buffer[100];
     void initialize_parameters();
     void perform_transformation(float fOldX, float fNewX, float fOldY,
@@ -94,6 +83,7 @@ class Viewer : public Gtk::GL::DrawingArea
         Matrix4x4* mNewMat);
     void perform_joint_rotation(float fOldX, float fNewX, float fOldY,
         float fNewY);
+    void draw_texture_cube();
 };
 
 #endif

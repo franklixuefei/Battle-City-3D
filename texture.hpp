@@ -14,23 +14,23 @@ class Texture
     virtual ~Texture();
     void end_tex_map();
 
-    void load_planet_texture(const std::string& filename, int index);
-    void apply_planet_texture(GLUquadric* quadric);
+    void load_textures();
+    void set_texture(int index);
 
   private:
     Texture();
     static Texture* texture_instance;
     Image m_images[6];
     Image m_normal_map;
-    int textureImageWidth;
-    int textureImageHeight;
-    GLubyte planet_tex_img[256][256][3];
+    int width;
+    int height;
+    GLubyte m_int_images[6][256][256][3];
     GLubyte normal_tex_img[256][256][3];
-    GLuint texNamePlanet;
+    GLuint textures[6];
     GLuint texNameNormal;
     GLuint normalisationCubeMap;
     void makeCheckImage();
-    bool GenerateNormalisationCubeMap();
+//    bool GenerateNormalisationCubeMap();
 };
 
 #endif /* TEXTURE_H_ */

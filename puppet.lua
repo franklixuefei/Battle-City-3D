@@ -187,7 +187,7 @@ thighBaseR:rotate('y', -90.0)
 thighJointR = gr.joint('thighJointR', {0.0, 0.0, 90.0}, {0.0, 0.0, 0.0})
 thighBaseR:add_child(thighJointR)
 
-thighR = gr.sphere('thighR')
+thighR = gr.nh_box('thighR', {20, 50, -10}, 15)
 thighJointR:add_child(thighR)
 thighR:set_material(blue)
 thighR:translate(0.0, -1.25, 0.0)

@@ -57,6 +57,9 @@ void NonhierSphere::walk_gl(bool picking) const
 void NonhierBox::walk_gl(bool picking) const
 {
   Texture::getInstance()->set_texture(0);
+  glPushMatrix();
+  glScalef(m_size, m_size, m_size);
+  glTranslatef(m_pos[0], m_pos[1], m_pos[2]);
   glBegin(GL_QUADS);
   // Front Face
   glTexCoord2f(0.0f, 0.0f);
@@ -113,5 +116,5 @@ void NonhierBox::walk_gl(bool picking) const
   glTexCoord2f(0.0f, 1.0f);
   glVertex3f(-1.0f, 1.0f, -1.0f);  // Top Left Of The Texture and Quad
   glEnd();
-  //TODO
+  glPopMatrix();
 }

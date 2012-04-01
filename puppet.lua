@@ -11,7 +11,7 @@
 red = gr.material({1.0, 0.0, 0.0}, {0.1, 0.1, 0.1}, 1)
 blue = gr.material({0.0, 0.0, 1.0}, {0.1, 0.1, 0.1}, 1)
 green = gr.material({0.0, 1.0, 0.0}, {0.1, 0.1, 0.1}, 1)
-white = gr.material({1.0, 1.0, 1.0}, {0.1, 0.1, 0.1}, 10)
+white = gr.material({1.0, 1.0, 1.0}, {1.0, 1.0, 1.0}, 1)
 black = gr.material({0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, 0)
 
 rootnode = gr.node('root')
@@ -187,9 +187,9 @@ thighBaseR:rotate('y', -90.0)
 thighJointR = gr.joint('thighJointR', {0.0, 0.0, 90.0}, {0.0, 0.0, 0.0})
 thighBaseR:add_child(thighJointR)
 
-thighR = gr.nh_box('thighR', {20, 50, -10}, 15)
+thighR = gr.nh_box('thighR', {0, 0, 0}, 1)
 thighJointR:add_child(thighR)
-thighR:set_material(blue)
+thighR:set_material(white)
 thighR:translate(0.0, -1.25, 0.0)
 thighR:scale(0.5, 1.25, 0.5)
 
@@ -250,6 +250,10 @@ footJointR:add_child(footR)
 footR:set_material(blue)
 footR:translate(0.0, -0.2, 0.0)
 footR:scale(0.3, 0.4, 0.3)
+
+--floor = gr.nh_box('floor', {0, 0, 0}, 50)
+--rootnode:add_child(floor)
+--floor:set_material(white)
 
 rootnode:translate(0.0, 0.0, -10.0)
 rootnode:scale(0.5, 0.5, 0.5)

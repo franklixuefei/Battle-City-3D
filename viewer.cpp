@@ -1,5 +1,6 @@
 #include "viewer.hpp"
 #include "algebra.hpp"
+#include "texture.hpp"
 #include <iostream>
 #include <math.h>
 #include <GL/gl.h>
@@ -127,11 +128,12 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
     glDisable(GL_CULL_FACE);
   }
 
+  draw_skybox();
   // Set up lighting
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-  GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
+  GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat light_specular[] = { 0.5, 0.5, 0.5, 1.0 };
   GLfloat light_position[] = { 10.0, 10.0, 4.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
@@ -225,6 +227,40 @@ void Viewer::draw_model(bool is_picking)
   model->set_transform(model->get_transform() * m_world_matrix);
   model->walk_gl(is_picking);
   model->set_transform(model->get_transform() * m_world_matrix_invert);
+}
+
+void Viewer::draw_skybox()
+{
+  Texture::getInstance()->set_texture(3);
+  glPushMatrix();
+  glScalef(15, 15, 1);
+  glTranslatef(0, 0, -26);
+  glBegin(GL_QUADS);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, -1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, -1.0f);
+  glEnd();
+  glPopMatrix();
+
+  Texture::getInstance()->set_texture(0);
+  glPushMatrix();
+  glTranslatef(0, 0, -15);
+  glBegin(GL_QUADS);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-13.0f, -4.0f, -13.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(13.0f, -4.0f, -13.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(13.0f, -4.0f, 13.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-13.0f, -4.0f, 13.0f);
+  glEnd();
+  glPopMatrix();
 }
 
 void Viewer::reset_position()

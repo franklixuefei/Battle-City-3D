@@ -56,6 +56,7 @@ class Viewer : public Gtk::GL::DrawingArea
     // Draw a circle for the trackball, with OpenGL commands.
     // Assumes the context for the viewer is active.
     void draw_model(bool is_picking = false);
+    void draw_skybox();
 
   private:
     SceneNode* model;

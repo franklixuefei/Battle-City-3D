@@ -30,7 +30,6 @@ class Texture
     GLuint texNameNormal;
     GLuint normalisationCubeMap;
     void makeCheckImage();
-//    bool GenerateNormalisationCubeMap();
 };
 
 #endif /* TEXTURE_H_ */

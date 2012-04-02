@@ -113,16 +113,6 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
     glDepthMask(GL_TRUE);
   }
 
-  if (m_backface_cull) {
-    glCullFace(GL_BACK);
-  }
-
-  if (m_backface_cull) {
-    glEnable(GL_CULL_FACE);
-  } else {
-    glDisable(GL_CULL_FACE);
-  }
-
   draw_skybox();
   // Set up lighting
   glEnable(GL_LIGHTING);

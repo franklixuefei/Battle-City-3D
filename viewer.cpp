@@ -226,8 +226,8 @@ void Viewer::draw_model(bool is_picking)
   model->set_transform(model->get_transform() * m_world_matrix);
   Level level = Level("levels/1");
   SceneNode * map = level.get_model();
-//  map->walk_gl(false);
-  model->walk_gl(is_picking);
+  map->walk_gl(false);
+//  model->walk_gl(is_picking);
   model->set_transform(model->get_transform() * m_world_matrix_invert);
 }
 

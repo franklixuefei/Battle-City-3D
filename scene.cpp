@@ -102,15 +102,18 @@ void JointNode::rotate_by(float angle, bool x_axis)
       m_rotate_x = m_joint_x.max;
     if (m_rotate_x < m_joint_x.min)
       m_rotate_x = m_joint_x.min;
-    set_transform(Matrix4x4::rotation(m_rotate_x, 'z') * Matrix4x4::rotation(m_rotate_y, 'y'));
-  }
-  else {
+    set_transform(
+        Matrix4x4::rotation(m_rotate_x, 'z')
+            * Matrix4x4::rotation(m_rotate_y, 'y'));
+  } else {
     m_rotate_y += angle;
     if (m_rotate_y > m_joint_y.max)
       m_rotate_y = m_joint_y.max;
     if (m_rotate_y < m_joint_y.min)
       m_rotate_y = m_joint_y.min;
-    set_transform(Matrix4x4::rotation(m_rotate_x, 'z') * Matrix4x4::rotation(m_rotate_y, 'y'));
+    set_transform(
+        Matrix4x4::rotation(m_rotate_x, 'z')
+            * Matrix4x4::rotation(m_rotate_y, 'y'));
   }
 }
 
@@ -126,14 +129,10 @@ GeometryNode::~GeometryNode()
 void GeometryNode::walk_gl(bool picking) const
 {
   glPushMatrix();
-
   glMultMatrixd(m_trans.transpose().begin());
-  std::cout<<"In GeometryNode"<<std::endl;
   m_material->apply_gl();
   glPushName(m_id);
-  std::cout<<"Pass material"<<std::endl;
   m_primitive->walk_gl(picking);
-  std::cout<<"Pass Primitive"<<std::endl;
   glPopName();
   glPopMatrix();
 }

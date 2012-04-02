@@ -5,6 +5,7 @@
 #include <gtkglmm.h>
 #include "scene.hpp"
 #include "scene_lua.hpp"
+#include "level.hpp"
 extern std::string filename;
 // The "main" OpenGL widget
 class Viewer : public Gtk::GL::DrawingArea
@@ -13,7 +14,7 @@ class Viewer : public Gtk::GL::DrawingArea
   public:
     enum mode_t
     {
-      POSITION_ORIENTATION, JOINTS
+      STRATEGY, FOLLOWING, GROUND
     };
     Viewer();
     virtual ~Viewer();
@@ -25,11 +26,9 @@ class Viewer : public Gtk::GL::DrawingArea
     void invalidate();
     void reset_position();
     void reset_orientation();
-    void reset_joints();
     void reset_all();
-    void undo();
-    void redo();
     void set_mode(mode_t mode);
+    void set_level(int level);
     void toggle_z_buffer();
     void toggle_backface_cull();
   protected:
@@ -59,7 +58,7 @@ class Viewer : public Gtk::GL::DrawingArea
     void draw_skybox();
 
   private:
-    SceneNode* model;
+    Level * m_level;
     std::list<SceneNode*> selected_joint_nodes;
     mode_t m_mode;
     gdouble m_last_x;
@@ -79,8 +78,6 @@ class Viewer : public Gtk::GL::DrawingArea
         float fDiameter, float *fVecX, float *fVecY, float *fVecZ);
     void vAxisRotMatrix(float fVecX, float fVecY, float fVecZ,
         Matrix4x4* mNewMat);
-    void picking(int cursorX, int cursorY);
-    void process_hits(GLint hits, GLuint buffer[]);
     void perform_joint_rotation(float fOldX, float fNewX, float fOldY,
         float fNewY);
 };

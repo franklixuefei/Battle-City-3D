@@ -33,18 +33,12 @@ Viewer::Viewer()
           | Gdk::BUTTON_RELEASE_MASK | Gdk::VISIBILITY_NOTIFY_MASK);
 
   initialize_parameters();
-
-  model = import_lua(filename);
-  if (!model) {
-    std::cerr << "Could not open " << filename << std::endl;
-  }
-  model->set_parentNode(model);
 }
 
 void Viewer::initialize_parameters()
 {
   //Initialize variables
-  m_mode = POSITION_ORIENTATION;
+  m_mode = STRATEGY;
   m_last_x = 0.0;
   m_left = false;
   m_right = false;
@@ -54,6 +48,7 @@ void Viewer::initialize_parameters()
   Vector3D vector = Vector3D(-13.0, -13.0, 45.0);
   m_translation = Matrix4x4().translation(vector);
   m_rotation = Matrix4x4().rotation(180.0, 'x');
+  m_level = new Level("levels/1");
 }
 
 Viewer::~Viewer()
@@ -188,9 +183,6 @@ bool Viewer::on_button_press_event(GdkEventButton* event)
   m_right = (event->button == (guint) 3);
   m_last_x = event->x;
   m_last_y = event->y;
-  if (m_mode == JOINTS && m_left) {
-    picking(event->x, event->y);
-  }
   return true;
 }
 
@@ -206,15 +198,7 @@ bool Viewer::on_motion_notify_event(GdkEventMotion* event)
 {
   guint m_current_x = event->x;
   guint m_current_y = event->y;
-  switch (m_mode) {
-    case POSITION_ORIENTATION:
-      perform_transformation(m_last_x, m_current_x, m_last_y, m_current_y);
-      break;
-    default:
-      if (m_middle || m_right)
-        perform_joint_rotation(m_last_x, m_current_x, m_last_y, m_current_y);
-      break;
-  }
+  perform_transformation(m_last_x, m_current_x, m_last_y, m_current_y);
   m_last_x = m_current_x;
   m_last_y = m_current_y;
   return true;
@@ -224,33 +208,68 @@ void Viewer::draw_model(bool is_picking)
 {
   Matrix4x4 m_world_matrix = m_rotation * m_translation;
   Matrix4x4 m_world_matrix_invert = m_world_matrix.invert();
-//  model->set_transform(model->get_transform() * m_world_matrix);
-  Level level = Level("levels/1");
-  SceneNode * map = level.get_model();
-  map->set_transform(map->get_transform() * m_world_matrix);
-  map->walk_gl(false);
-  map->set_transform(map->get_transform() * m_world_matrix_invert);
-//  model->walk_gl(is_picking);
-//  model->set_transform(model->get_transform() * m_world_matrix_invert);
+  SceneNode * level = m_level->get_model();
+  level->set_transform(level->get_transform() * m_world_matrix);
+  level->walk_gl(is_picking);
+  level->set_transform(level->get_transform() * m_world_matrix_invert);
 }
 
 void Viewer::draw_skybox()
 {
-//  Texture::getInstance()->set_texture(3);
-//  glPushMatrix();
-//  glScalef(15, 15, 1);
-//  glTranslatef(0, 0, -26);
-//  glBegin(GL_QUADS);
-//  glTexCoord2f(1.0f, 0.0f);
-//  glVertex3f(-1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-//  glVertex3f(-1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-//  glVertex3f(1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-//  glVertex3f(1.0f, -1.0f, -1.0f);
-//  glEnd();
-//  glPopMatrix();
+  Texture::getInstance()->set_texture(3);
+  glPushMatrix();
+  glScalef(100, 100, 100);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, 1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, -1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(-1.0f, 1.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, 1.0f, 1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, -1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-1.0f, -1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, -1.0f, -1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, -1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, 1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, -1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, 1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, 1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, -1.0f);
+  glEnd();
+  glPopMatrix();
 }
 
 void Viewer::reset_position()
@@ -265,17 +284,10 @@ void Viewer::reset_orientation()
   invalidate();
 }
 
-void Viewer::reset_joints()
-{
-  model->reset();
-  invalidate();
-}
-
 void Viewer::reset_all()
 {
   m_translation = Matrix4x4();
   m_rotation = Matrix4x4();
-  model->reset();
   invalidate();
 }
 
@@ -284,6 +296,16 @@ void Viewer::set_mode(mode_t mode)
   m_mode = mode;
 }
 
+void Viewer::set_level(int level)
+{
+  delete m_level;
+  if (level == 2) {
+    m_level = new Level("levels/2");
+  } else {
+    m_level = new Level("levels/1");
+  }
+  invalidate();
+}
 void Viewer::toggle_z_buffer()
 {
   m_z_buffer = !m_z_buffer;
@@ -433,54 +455,4 @@ void Viewer::vAxisRotMatrix(float fVecX, float fVecY, float fVecZ,
   rotation[2][2] = dCosAlpha + fNewVecZ * fNewVecZ * dT;
 
   *mNewMat = Matrix4x4(rotation);
-}
-
-void Viewer::picking(int cursorX, int cursorY)
-{
-  GLint *viewport = new GLint[4];
-
-  glGetIntegerv(GL_VIEWPORT, viewport);
-
-  glSelectBuffer(100, select_buffer);
-  glRenderMode(GL_SELECT);
-
-  glInitNames();
-  glPushName(0);
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-
-  gluPickMatrix(cursorX, viewport[3] - cursorY, 1.0, 1.0, viewport);
-  gluPerspective(40.0, (GLfloat) get_width() / (GLfloat) get_height(), 0.1,
-      1000.0);
-  draw_model(true);
-  glPopMatrix();
-  glFlush();
-  int hits;
-  hits = glRenderMode(GL_RENDER);
-  if (hits != 0) {
-    process_hits(hits, select_buffer);
-  }
-}
-
-void Viewer::process_hits(GLint hits, GLuint buffer[])
-{
-  GLuint * ptr;
-  ptr = (GLuint *) buffer;
-  ptr--;
-  for (GLint i = 0; i < hits; i++) {
-    ptr = ptr + 5;
-    SceneNode * node = model->get_node_by_id(*ptr);
-    if (node != 0) {
-      if (node->get_parentNode() != 0) {
-        if (node->toggle_selected()) {
-          selected_joint_nodes.push_back(node->get_parentNode());
-        } else {
-          selected_joint_nodes.remove(node->get_parentNode());
-        }
-      }
-    }
-  }
-  invalidate();
 }

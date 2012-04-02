@@ -18,6 +18,7 @@ class Level
     SceneNode * get_model();
   private:
     int m_map[26][26];
+    SceneNode * nodes[26][26];
     SceneNode * root;
 };
 

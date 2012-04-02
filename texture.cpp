@@ -64,10 +64,3 @@ void Texture::set_texture(int index)
   gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE,
       m_int_images[index]);
 }
-
-void Texture::end_tex_map()
-{
-  glFlush();
-  glDisable(GL_TEXTURE_CUBE_MAP);
-  glDisable(GL_TEXTURE_2D);
-}

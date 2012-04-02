@@ -36,42 +36,49 @@ Level::Level(string filename)
           GeometryNode * node = new GeometryNode("brick", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         } else if (m_map[x][y] == 2) {
           Point3D point = Point3D(x, y, 0.0);
           Steel * cube = new Steel(point, 1);
           GeometryNode * node = new GeometryNode("steel", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         } else if (m_map[x][y] == 3) {
           Point3D point = Point3D(x, y, 0.0);
           Water * cube = new Water(point, 1);
           GeometryNode * node = new GeometryNode("water", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         } else if (m_map[x][y] == 4) {
           Point3D point = Point3D(x, y, 0.0);
           Snow * cube = new Snow(point, 1);
           GeometryNode * node = new GeometryNode("snow", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         } else if (m_map[x][y] == 5) {
           Point3D point = Point3D(x, y, 0.0);
           Grass * cube = new Grass(point, 1);
           GeometryNode * node = new GeometryNode("grass", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         } else {
           Point3D point = Point3D(x, y, 0.0);
           Sand * cube = new Sand(point, 1);
           GeometryNode * node = new GeometryNode("sand", cube);
           node->set_material(material);
           root->add_child(node);
+          nodes[x][y] = node;
         }
       }
     }
-    Point3D point = Point3D(8, 24, 0.0);
+    Point3D point = Point3D(0, 0, 0.0);
     Tank * cube = new Tank(point, 1);
     GeometryNode * node = new GeometryNode("tank", cube);
+    node->translate(Vector3D(8.0, 24.0, 0.0));
     node->set_material(material);
     root->add_child(node);
   }

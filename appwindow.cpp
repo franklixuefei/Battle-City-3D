@@ -32,20 +32,23 @@ AppWindow::AppWindow()
   m_menu_mode.items().push_back(
       RadioMenuElem(m_radiobuttongroup_mode, "_Strategy Mode",
           Gtk::AccelKey("1"),
-          sigc::bind(mode_slot, Viewer::POSITION_ORIENTATION)));
+          sigc::bind(mode_slot, Viewer::STRATEGY)));
   m_menu_mode.items().push_back(
       RadioMenuElem(m_radiobuttongroup_mode, "_Following Mode",
-          Gtk::AccelKey("2"), sigc::bind(mode_slot, Viewer::JOINTS)));
+          Gtk::AccelKey("2"), sigc::bind(mode_slot, Viewer::FOLLOWING)));
   m_menu_mode.items().push_back(
       RadioMenuElem(m_radiobuttongroup_mode, "_Ground Mode", Gtk::AccelKey("3"),
-          sigc::bind(mode_slot, Viewer::JOINTS)));
+          sigc::bind(mode_slot, Viewer::GROUND)));
 
+  Gtk::RadioButtonGroup m_radiobuttongroup_level;
+  sigc::slot1<void, int> level_slot = sigc::mem_fun(m_viewer,
+        &Viewer::set_level);
   m_menu_levels.items().push_back(
-      CheckMenuElem("_Z-buffer", Gtk::AccelKey("z"),
-          sigc::mem_fun(m_viewer, &Viewer::toggle_z_buffer)));
+      RadioMenuElem(m_radiobuttongroup_level, "Level 1",
+          sigc::bind(level_slot, 1)));
   m_menu_levels.items().push_back(
-      CheckMenuElem("_Backface cull", Gtk::AccelKey("b"),
-          sigc::mem_fun(m_viewer, &Viewer::toggle_backface_cull)));
+      RadioMenuElem(m_radiobuttongroup_level, "Level 2",
+          sigc::bind(level_slot, 2)));
 
   // Set up the menu bar
   m_menubar.items().push_back(

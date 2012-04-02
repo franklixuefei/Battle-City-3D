@@ -33,8 +33,6 @@ Viewer::Viewer()
 
   initialize_parameters();
 
-//  model = import_lua("puppet.lua");
-
   model = import_lua(filename);
   if (!model) {
     std::cerr << "Could not open " << filename << std::endl;

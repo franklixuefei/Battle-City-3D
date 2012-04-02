@@ -154,6 +154,23 @@ class Grass : public Primitive
     double m_size;
 };
 
+class Tank : public Primitive
+{
+  public:
+    Tank(const Point3D& pos, double size) :
+        m_pos(pos), m_size(size)
+    {
+    }
+
+    virtual ~Tank()
+    {
+    }
+    virtual void walk_gl(bool picking) const;
+  private:
+    Point3D m_pos;
+    double m_size;
+};
+
 class Cube : public Primitive
 {
   public:

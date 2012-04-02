@@ -236,36 +236,21 @@ void Viewer::draw_model(bool is_picking)
 
 void Viewer::draw_skybox()
 {
-//  Texture::getInstance()->set_texture(3);
-//  glPushMatrix();
-//  glScalef(15, 15, 1);
-//  glTranslatef(0, 0, -26);
-//  glBegin(GL_QUADS);
-//  glTexCoord2f(1.0f, 0.0f);
-//  glVertex3f(-1.0f, -1.0f, -1.0f);
-//  glTexCoord2f(1.0f, 1.0f);
-//  glVertex3f(-1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-//  glVertex3f(1.0f, 1.0f, -1.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-//  glVertex3f(1.0f, -1.0f, -1.0f);
-//  glEnd();
-//  glPopMatrix();
-
-//  Texture::getInstance()->set_texture(0);
-//  glPushMatrix();
-//  glTranslatef(0, 0, -15);
-//  glBegin(GL_QUADS);
-//  glTexCoord2f(1.0f, 1.0f);
-//  glVertex3f(-13.0f, -4.0f, -13.0f);
-//  glTexCoord2f(0.0f, 1.0f);
-//  glVertex3f(13.0f, -4.0f, -13.0f);
-//  glTexCoord2f(0.0f, 0.0f);
-//  glVertex3f(13.0f, -4.0f, 13.0f);
-//  glTexCoord2f(1.0f, 0.0f);
-//  glVertex3f(-13.0f, -4.0f, 13.0f);
-//  glEnd();
-//  glPopMatrix();
+  Texture::getInstance()->set_texture(3);
+  glPushMatrix();
+  glScalef(15, 15, 1);
+  glTranslatef(0, 0, -26);
+  glBegin(GL_QUADS);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f, -1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(-1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, -1.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, -1.0f);
+  glEnd();
+  glPopMatrix();
 }
 
 void Viewer::reset_position()

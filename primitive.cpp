@@ -57,19 +57,19 @@ void NonhierSphere::walk_gl(bool picking) const
 void Primitive::draw_floor(Point3D m_pos, double m_size) const
 {
   glPushMatrix();
-    glScalef(m_size, m_size, m_size);
-    glTranslatef(m_pos[0], m_pos[1], m_pos[2]);
-    glBegin (GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(0.0f, 0.0f, 1.0f);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, 0.0f, 1.0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(0.0f, 1.0f, 1.0f);
-    glEnd();
-    glPopMatrix();
+  glScalef(m_size, m_size, m_size);
+  glTranslatef(m_pos[0], m_pos[1], m_pos[2]);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 1.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 1.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 1.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 1.0f);
+  glEnd();
+  glPopMatrix();
 }
 
 void Primitive::draw_box(Point3D m_pos, double m_size) const
@@ -77,7 +77,7 @@ void Primitive::draw_box(Point3D m_pos, double m_size) const
   glPushMatrix();
   glScalef(m_size, m_size, m_size);
   glTranslatef(m_pos[0], m_pos[1], m_pos[2]);
-  glBegin (GL_QUADS);
+  glBegin(GL_QUADS);
   // Front Face
   glTexCoord2f(0.0f, 0.0f);
   glVertex3f(0.0f, 0.0f, 1.0f);
@@ -175,4 +175,127 @@ void Grass::walk_gl(bool picking) const
 {
   Texture::getInstance()->set_texture(5);
   draw_box(m_pos, m_size);
+}
+
+void Tank::walk_gl(bool picking) const
+{
+  Texture::getInstance()->set_texture(5);
+  glPushMatrix();
+  glScalef(m_size, m_size, m_size);
+  glTranslatef(m_pos[0], m_pos[1], m_pos[2]);
+  glBegin(GL_QUADS);
+  // Front Face
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 0.5f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 0.5f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 0.5f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 0.5f);
+  // Back Face
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 0.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 0.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 0.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 0.0f);
+  // Top Face
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 0.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(0.0f, 1.0f, 0.5f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, 1.0f, 0.5f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 0.0f);
+  // Bottom Face
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(0.0f, 0.0f, 0.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 0.0f, 0.0f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 0.5f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 0.5f);
+  // Right face
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 0.0f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 0.0f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(1.0f, 1.0f, 0.5f);
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(1.0f, 0.0f, 0.5f);
+  // Left Face
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 0.0f);
+  glTexCoord2f(1.0f, 0.0f);
+  glVertex3f(0.0f, 0.0f, 0.5f);
+  glTexCoord2f(1.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 0.5f);
+  glTexCoord2f(0.0f, 1.0f);
+  glVertex3f(0.0f, 1.0f, 0.0f);
+
+
+
+  // Front Face
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 1.0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 1.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(0.25f, 1.0f, 1.0f);
+    // Back Face
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 0.5f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(0.25f, 1.0f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.5f);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 0.5f);
+    // Top Face
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(0.25f, 1.0f, 0.5f);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(0.25f, 1.0f, 1.0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.5f);
+    // Bottom Face
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(0.25f, 0.0f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(1.0f, 0.0f, 0.5f);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 1.0f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 1.0f);
+    // Right face
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 0.5f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(1.0f, 0.0f, 1.0f);
+    // Left Face
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 0.5f);
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(0.25f, 0.0f, 1.0f);
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(0.25f, 1.0f, 1.0f);
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(0.25f, 1.0f, 0.5f);
+
+  glEnd();
+  glPopMatrix();
 }

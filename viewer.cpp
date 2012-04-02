@@ -135,7 +135,7 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat light_specular[] = { 0.5, 0.5, 0.5, 1.0 };
-  GLfloat light_position[] = { -13.0, -13.0, 45.0, 1.0 };
+  GLfloat light_position[] = { -13.0, -13.0, 40.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);

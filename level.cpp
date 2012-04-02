@@ -27,17 +27,45 @@ Level::Level(string filename)
   } else {
     Material * material = new PhongMaterial(Colour(1.0, 1.0, 1.0),
         Colour(1.0, 1.0, 1.0), 1.0);
-    for (int y = 25; y >= 0; y--) {
+    for (int y = 0; y < 26; y++) {
       for (int x = 0; x < 26; x++) {
         dataIn >> m_map[x][y];
-        if (m_map[x][y] != 0) {
-          if (m_map[x][y] == 1) {
-            Point3D point = Point3D(x * 1.0, y * 1.0, 1.0);
-            NonhierBox * cube = new NonhierBox(point, 1);
-            GeometryNode * node = new GeometryNode("brick", cube);
-            node->set_material(material);
-            root->add_child(node);
-          }
+        if (m_map[x][y] == 1) {
+          Point3D point = Point3D(x, y, 0.0);
+          Brick * cube = new Brick(point, 1);
+          GeometryNode * node = new GeometryNode("brick", cube);
+          node->set_material(material);
+          root->add_child(node);
+        } else if (m_map[x][y] == 2) {
+          Point3D point = Point3D(x, y, 0.0);
+          Steel * cube = new Steel(point, 1);
+          GeometryNode * node = new GeometryNode("steel", cube);
+          node->set_material(material);
+          root->add_child(node);
+        }  else if (m_map[x][y] == 3) {
+          Point3D point = Point3D(x, y, 0.0);
+          Water * cube = new Water(point, 1);
+          GeometryNode * node = new GeometryNode("water", cube);
+          node->set_material(material);
+          root->add_child(node);
+        }  else if (m_map[x][y] == 4) {
+          Point3D point = Point3D(x, y, 0.0);
+          Snow * cube = new Snow(point, 1);
+          GeometryNode * node = new GeometryNode("snow", cube);
+          node->set_material(material);
+          root->add_child(node);
+        }  else if (m_map[x][y] == 5) {
+          Point3D point = Point3D(x, y, 0.0);
+          Grass * cube = new Grass(point, 1);
+          GeometryNode * node = new GeometryNode("grass", cube);
+          node->set_material(material);
+          root->add_child(node);
+        } else {
+          Point3D point = Point3D(x, y, 0.0);
+          Sand * cube = new Sand(point, 1);
+          GeometryNode * node = new GeometryNode("sand", cube);
+          node->set_material(material);
+          root->add_child(node);
         }
       }
     }

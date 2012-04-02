@@ -51,8 +51,9 @@ void Viewer::initialize_parameters()
   m_middle = false;
   m_z_buffer = false;
   m_backface_cull = false;
-  m_translation = Matrix4x4();
-  m_rotation = Matrix4x4();
+  Vector3D vector = Vector3D(-13.0, -13.0, 45.0);
+  m_translation = Matrix4x4().translation(vector);
+  m_rotation = Matrix4x4().rotation(180.0, 'x');
 }
 
 Viewer::~Viewer()
@@ -134,7 +135,7 @@ bool Viewer::on_expose_event(GdkEventExpose* event)
   GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
   GLfloat light_specular[] = { 0.5, 0.5, 0.5, 1.0 };
-  GLfloat light_position[] = { 10.0, 10.0, 4.0, 1.0 };
+  GLfloat light_position[] = { -13.0, -13.0, 45.0, 1.0 };
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
@@ -223,46 +224,48 @@ void Viewer::draw_model(bool is_picking)
 {
   Matrix4x4 m_world_matrix = m_rotation * m_translation;
   Matrix4x4 m_world_matrix_invert = m_world_matrix.invert();
-  model->set_transform(model->get_transform() * m_world_matrix);
+//  model->set_transform(model->get_transform() * m_world_matrix);
   Level level = Level("levels/1");
   SceneNode * map = level.get_model();
+  map->set_transform(map->get_transform() * m_world_matrix);
   map->walk_gl(false);
+  map->set_transform(map->get_transform() * m_world_matrix_invert);
 //  model->walk_gl(is_picking);
-  model->set_transform(model->get_transform() * m_world_matrix_invert);
+//  model->set_transform(model->get_transform() * m_world_matrix_invert);
 }
 
 void Viewer::draw_skybox()
 {
-  Texture::getInstance()->set_texture(3);
-  glPushMatrix();
-  glScalef(15, 15, 1);
-  glTranslatef(0, 0, -26);
-  glBegin(GL_QUADS);
-  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(-1.0f, -1.0f, -1.0f);
-  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(-1.0f, 1.0f, -1.0f);
-  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(1.0f, 1.0f, -1.0f);
-  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(1.0f, -1.0f, -1.0f);
-  glEnd();
-  glPopMatrix();
+//  Texture::getInstance()->set_texture(3);
+//  glPushMatrix();
+//  glScalef(15, 15, 1);
+//  glTranslatef(0, 0, -26);
+//  glBegin(GL_QUADS);
+//  glTexCoord2f(1.0f, 0.0f);
+//  glVertex3f(-1.0f, -1.0f, -1.0f);
+//  glTexCoord2f(1.0f, 1.0f);
+//  glVertex3f(-1.0f, 1.0f, -1.0f);
+//  glTexCoord2f(0.0f, 1.0f);
+//  glVertex3f(1.0f, 1.0f, -1.0f);
+//  glTexCoord2f(0.0f, 0.0f);
+//  glVertex3f(1.0f, -1.0f, -1.0f);
+//  glEnd();
+//  glPopMatrix();
 
-  Texture::getInstance()->set_texture(0);
-  glPushMatrix();
-  glTranslatef(0, 0, -15);
-  glBegin(GL_QUADS);
-  glTexCoord2f(1.0f, 1.0f);
-  glVertex3f(-13.0f, -4.0f, -13.0f);
-  glTexCoord2f(0.0f, 1.0f);
-  glVertex3f(13.0f, -4.0f, -13.0f);
-  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(13.0f, -4.0f, 13.0f);
-  glTexCoord2f(1.0f, 0.0f);
-  glVertex3f(-13.0f, -4.0f, 13.0f);
-  glEnd();
-  glPopMatrix();
+//  Texture::getInstance()->set_texture(0);
+//  glPushMatrix();
+//  glTranslatef(0, 0, -15);
+//  glBegin(GL_QUADS);
+//  glTexCoord2f(1.0f, 1.0f);
+//  glVertex3f(-13.0f, -4.0f, -13.0f);
+//  glTexCoord2f(0.0f, 1.0f);
+//  glVertex3f(13.0f, -4.0f, -13.0f);
+//  glTexCoord2f(0.0f, 0.0f);
+//  glVertex3f(13.0f, -4.0f, 13.0f);
+//  glTexCoord2f(1.0f, 0.0f);
+//  glVertex3f(-13.0f, -4.0f, 13.0f);
+//  glEnd();
+//  glPopMatrix();
 }
 
 void Viewer::reset_position()

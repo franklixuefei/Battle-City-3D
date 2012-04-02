@@ -1,6 +1,7 @@
 #include "viewer.hpp"
 #include "algebra.hpp"
 #include "texture.hpp"
+#include "level.hpp"
 #include <iostream>
 #include <math.h>
 #include <GL/gl.h>
@@ -223,6 +224,9 @@ void Viewer::draw_model(bool is_picking)
   Matrix4x4 m_world_matrix = m_rotation * m_translation;
   Matrix4x4 m_world_matrix_invert = m_world_matrix.invert();
   model->set_transform(model->get_transform() * m_world_matrix);
+  Level level = Level("levels/1");
+  SceneNode * map = level.get_model();
+//  map->walk_gl(false);
   model->walk_gl(is_picking);
   model->set_transform(model->get_transform() * m_world_matrix_invert);
 }

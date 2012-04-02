@@ -128,15 +128,12 @@ void GeometryNode::walk_gl(bool picking) const
   glPushMatrix();
 
   glMultMatrixd(m_trans.transpose().begin());
-  if (m_selected) {
-    Material * m_selected_material = new PhongMaterial(Colour(1.0, 0.0, 0.0),
-        Colour(0.1, 0.1, 0.1), 0.5);
-    m_selected_material->apply_gl();
-  } else {
-    m_material->apply_gl();
-  }
+  std::cout<<"In GeometryNode"<<std::endl;
+  m_material->apply_gl();
   glPushName(m_id);
+  std::cout<<"Pass material"<<std::endl;
   m_primitive->walk_gl(picking);
+  std::cout<<"Pass Primitive"<<std::endl;
   glPopName();
   glPopMatrix();
 }

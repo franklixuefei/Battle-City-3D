@@ -19,7 +19,7 @@ void PhongMaterial::apply_gl() const
   // Perform OpenGL calls necessary to set up this material.
   GLfloat diffuse[] = { m_kd.R(), m_kd.G(), m_kd.B(), 1.0 };
   GLfloat mspecular[] = { m_ks.R(), m_ks.G(), m_ks.B(), 1.0 };
-  GLfloat shininess[] = { m_shininess/10, m_shininess/10, m_shininess/10, 1.0 };
+  GLfloat shininess[] = { m_shininess, m_shininess, m_shininess, 1.0 };
 
   glShadeModel(GL_SMOOTH);
 
